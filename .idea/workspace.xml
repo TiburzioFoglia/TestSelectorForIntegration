@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/TestsSelector.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/codebert_analyzer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/base_classes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/extractor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/method_extractor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/csharp_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/go_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/java_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/javascript_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/php_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/python_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/extraction_classes/parsers/ruby_parser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/save_results.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2xboqGQTge0Lplpbb5jWjRA0css" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.cSharpExtractor.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\simon\PycharmProjects\TestsSelector\extraction_classes\parsers" />
+      <recent name="C:\Users\simon\PycharmProjects\TestsSelector" />
+      <recent name="C:\Users\simon\PycharmProjects\TestsSelector\extraction_classes" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="" />
+      <created>1748216323355</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1748216323355</updated>
+      <workItem from="1748216324543" duration="132000" />
+      <workItem from="1748216618733" duration="231000" />
+      <workItem from="1748424568329" duration="2816000" />
+      <workItem from="1748442250170" duration="5895000" />
+      <workItem from="1748522388115" duration="2891000" />
+      <workItem from="1749560231282" duration="1219000" />
+      <workItem from="1749637337710" duration="19810000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/TestsSelector$cSharpExtractor.coverage" NAME="cSharpExtractor Coverage Results" MODIFIED="1748428619546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
