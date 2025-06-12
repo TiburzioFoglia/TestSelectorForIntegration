@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from itertools import cycle
 
 from codebert_analyzer import CodeBERTAnalyzer
 from extraction_classes.base_classes import Language
@@ -19,7 +20,7 @@ LANGUAGES = {
 
 def main():
     if len(sys.argv) < 3:
-        print("Uso: python main.py file_name numero_elementi [linguaggio_opzionale]")
+        print("Uso: python main.py file_name numero_test [linguaggio_opzionale]")
         sys.exit(1)
 
     file_name = sys.argv[1]
@@ -42,13 +43,67 @@ def main():
 
     results = codebert_analysis(methods,clean_methods)
     if results:
-        print("\n🎉 Analisi completata con successo!")
+        print("\nAnalisi completata con successo!")
     else:
-        print("❌ Analisi fallita")
+        print("Analisi fallita")
 
     print("=" * 50)
 
+    round_robin_selection(num_elements)
+    print("")
+    print("=" * 50)
     #aggiungere metodo per scelta automatica
+
+# TODO fix
+def round_robin_selection(n):
+
+    with open("analysis_output/complete_analysis.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    cluster_data = data.get("detailed_results", {}).get("cluster_analysis", {})
+
+    selected = {k: {"method_count": 0, "avg_complexity": 0.0, "avg_lines": 0.0,
+                    "methods": [], "characteristics": v["characteristics"]}
+                for k, v in cluster_data.items()}
+
+    clusters = [k for k in cluster_data if cluster_data[k]["methods"]]
+    cluster_cycle = cycle(clusters)
+    method_count = 0
+
+    while method_count < n and clusters:
+        current = next(cluster_cycle)
+        if cluster_data[current]["methods"]:
+            method = cluster_data[current]["methods"].pop(0)
+            selected[current]["methods"].append(method)
+            method_count += 1
+        # Rimuovi cluster vuoti dal ciclo
+        clusters = [c for c in clusters if cluster_data[c]["methods"]]
+        cluster_cycle = cycle(clusters)
+
+    clusters_to_delete = []
+    for k in selected:
+        methods = selected[k]["methods"]
+        count = len(methods)
+        if count > 0:
+            orig = cluster_data[k]
+            selected[k]["method_count"] = count
+            # selected[k]["avg_complexity"] = orig["avg_complexity"]
+            # selected[k]["avg_lines"] = orig["avg_lines"]
+        else:
+            clusters_to_delete.append(k)
+
+    # Rimuove i cluster vuoti dopo l’iterazione
+    for k in clusters_to_delete:
+        del selected[k]
+
+    output_data = {
+        "selected_methods": {
+            "cluster_analysis": selected
+        }
+    }
+
+    with open("selected_methods.json", "w", encoding="utf-8") as f:
+        json.dump(output_data, f, indent=2, ensure_ascii=False)
 
 
 def get_language(file_name, lang_arg=None):
