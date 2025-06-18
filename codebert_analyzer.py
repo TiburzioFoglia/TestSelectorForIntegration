@@ -77,7 +77,7 @@ class CodeBERTAnalyzer:
         if method == 'dbscan':
             return self._dbscan_clustering(embeddings, **kwargs)
         elif method == 'kmeans':
-            n_clusters = kwargs.get('n_clusters', 5)
+            n_clusters = kwargs.get('n_clusters', 3)
             return self._kmeans_clustering(embeddings, n_clusters)
         else:
             raise ValueError(f"Metodo non supportato: {method}")
@@ -88,7 +88,7 @@ class CodeBERTAnalyzer:
         # Auto-determina eps se non specificato
         if eps is None:
             eps = self._estimate_optimal_eps(embeddings, min_samples)
-            print(f"Epsilon ottimale stimato: {eps:.4f}")
+            print(f"NO Epsilon passed, using: {eps:.4f}")
 
         # Usa distanza coseno per embeddings
         dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='cosine')
@@ -175,20 +175,8 @@ class CodeBERTAnalyzer:
         # Calcola similarità
         similar_methods = self.find_similar_methods(embeddings, method_names)
 
-        # Raggruppa in cluster (DBSCAN automatico)
-        cluster_labels = self.cluster_methods(embeddings, method='dbscan')
-
-        # Gestisci il caso in cui DBSCAN trova pochi cluster
-        n_clusters_found = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
-        #TODO gestire caso in cui gli outliers sono pochi insieme al numero di clusters basso (sono tutti raggruppati)
-        if n_clusters_found < 2:
-            print("DBSCAN ha trovato pochi cluster, provo con parametri più permissivi...")
-            cluster_labels = self.cluster_methods(embeddings, method='dbscan', eps=0.3, min_samples=1)
-            n_clusters_found = len(set(cluster_labels)) - (1 if -1 in cluster_labels else 0)
-
-        if n_clusters_found < 2:
-            print("Uso K-Means con 3 cluster come fallback")
-            cluster_labels = self.cluster_methods(embeddings, method='kmeans', n_clusters=3)
+        # Raggruppa in cluster
+        cluster_labels = self._robust_clustering(embeddings)
 
         # Analizza complessità
         complexity_metrics = self.analyze_code_complexity(code_snippets)
@@ -213,11 +201,110 @@ class CodeBERTAnalyzer:
             'cluster_analysis': self._analyze_clusters(df)
         }
 
-        with open('codebert_analysis_results.json', 'w', encoding='utf-8') as f:
+        with open('analysis_output/codebert_analysis_results.json', 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False, default=str)
 
-        print(f"Report salvato in: codebert_analysis_results.json")
+        print(f"Report salvato in: analysis_output/codebert_analysis_results.json")
         return results
+
+
+    def _robust_clustering(self, embeddings: np.ndarray, max_iterations: int = 6) -> np.ndarray:
+        n_samples = len(embeddings)
+
+        # Parametri DBSCAN da testare progressivamente
+        dbscan_configs = [
+            {'eps': 0.5, 'min_samples': max(2, n_samples // 10)},   # Configurazione standard
+            {'eps': 0.4, 'min_samples': max(2, n_samples // 15)},   # Più permissivo
+            {'eps': 0.3, 'min_samples': max(2, n_samples // 20)},   # Ancora più permissivo
+            {'eps': 0.2, 'min_samples': 2},                         # Molto permissivo ma almeno 2 elementi
+            {'eps': 0.6, 'min_samples': max(2, n_samples // 8)},    # Eps più alto
+            {'eps': 0.1, 'min_samples': 2},                         # Ultima chance con eps molto basso
+        ]
+
+        best_result = None
+        best_score = -1
+
+        print(f"Inizio clustering robusto su {n_samples} campioni...")
+
+        for iteration in range(min(max_iterations, len(dbscan_configs))):
+            config = dbscan_configs[iteration]
+            print(f"Iterazione {iteration + 1}: DBSCAN con eps={config['eps']}, min_samples={config['min_samples']}")
+
+            try:
+                cluster_labels = self.cluster_methods(embeddings, method='dbscan', **config)
+                result_info = self._evaluate_clustering_result(cluster_labels, n_samples)
+
+                print(f"  → {result_info['n_clusters']} cluster, {result_info['n_outliers']} outliers "
+                      f"({result_info['outlier_percentage']:.1f}%), score: {result_info['score']:.3f}")
+
+                # Salva il miglior risultato basato su uno score composito
+                if result_info['score'] > best_score:
+                    if result_info['n_outliers'] > 0 and result_info['n_clusters'] > 1:
+                        best_result = cluster_labels
+                        best_score = result_info['score']
+
+                # Condizioni di stop: risultato soddisfacente
+                if self._is_clustering_satisfactory(result_info):
+                    print(f"Clustering soddisfacente trovato all'iterazione {iteration + 1}")
+                    return cluster_labels
+
+            except Exception as e:
+                print(f"  ✗ Errore con configurazione {config}: {e}")
+                continue
+
+        # Se nessun DBSCAN ha dato risultati soddisfacenti, usa il migliore o fallback
+        if best_result is not None:
+            print(f"Uso il miglior risultato DBSCAN (score: {best_score:.3f})")
+            return best_result
+        else:
+            print("Nessun DBSCAN valido, uso K-Means come fallback")
+            return self._kmeans_fallback(embeddings, n_samples)
+
+
+    def _evaluate_clustering_result(self, cluster_labels: np.ndarray, n_samples: int) -> Dict:
+        unique_labels = set(cluster_labels)
+        n_clusters = len(unique_labels) - (1 if -1 in unique_labels else 0)
+        n_outliers = sum(1 for label in cluster_labels if label == -1)
+        outlier_percentage = (n_outliers / n_samples) * 100
+
+        # Score composito che bilancia numero di cluster e percentuale di outliers
+        if n_clusters == 0:
+            score = 0.0
+        else:
+            # Penalizza troppi pochi cluster e troppi outliers
+            cluster_score = min(n_clusters / max(2, n_samples // 10), 1.0)  # Normalizzato
+            outlier_penalty = max(0, (outlier_percentage - 20) / 100)  # Penalità se >20% outliers
+            score = cluster_score - outlier_penalty
+
+        return {
+            'n_clusters': n_clusters,
+            'n_outliers': n_outliers,
+            'outlier_percentage': outlier_percentage,
+            'score': score
+        }
+
+
+    def _is_clustering_satisfactory(self, result_info: Dict) -> bool:
+        """Determina se il clustering è soddisfacente"""
+        return (
+                result_info['n_clusters'] >= 2 and  # Almeno 2 cluster
+                result_info['outlier_percentage'] <= 30 and  # Non troppi outliers
+                result_info['score'] > 0.3  # Score decente
+        )
+
+    def _kmeans_fallback(self, embeddings: np.ndarray, n_samples: int) -> np.ndarray:
+        # Determina il numero ottimale di cluster per K-Means
+        if n_samples < 10:
+            n_clusters = 2
+        elif n_samples < 30:
+            n_clusters = 3
+        elif n_samples < 100:
+            n_clusters = min(5, n_samples // 10)
+        else:
+            n_clusters = min(8, n_samples // 20)
+
+        print(f"K-Means fallback con {n_clusters} cluster")
+        return self.cluster_methods(embeddings, method='kmeans', n_clusters=n_clusters)
 
     def _create_visualizations(self, df: pd.DataFrame):
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
@@ -276,7 +363,7 @@ class CodeBERTAnalyzer:
             axes[1, 1].set_title('Distribuzione Complessità')
 
         plt.tight_layout()
-        plt.savefig('codebert_analysis_visualizations.png', dpi=300, bbox_inches='tight')
+        plt.savefig('analysis_output/codebert_analysis_visualizations.png', dpi=300, bbox_inches='tight')
         # plt.show()
 
     def _analyze_clusters(self, df: pd.DataFrame) -> Dict:

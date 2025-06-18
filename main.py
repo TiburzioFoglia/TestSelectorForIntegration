@@ -1,12 +1,13 @@
 import json
 import os
 import sys
-from itertools import cycle
+import shutil
 
 from codebert_analyzer import CodeBERTAnalyzer
 from extraction_classes.base_classes import Language
 from extraction_classes.method_extractor import MultiLanguageMethodExtractor
 from save_results import SaveResults
+from method_selector import process_and_save
 
 LANGUAGES = {
     '.cs': Language.CSHARP,
@@ -35,6 +36,25 @@ def main():
     print(f"Linguaggio selezionato: {language.value}")
     print("=" * 50)
 
+    # Prima di continuare elimino cartella analisi se esiste
+    folder_path = 'analysis_output'
+    file_path = 'selected_methods.json'
+    print(f"Pulizia dati di precedenti computazioni.")
+
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        shutil.rmtree(folder_path)
+        print(f"Cartella '{folder_path}' eliminata.")
+    else:
+        print(f"La cartella '{folder_path}' non esiste.")
+
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        os.remove(file_path)
+        print(f"File '{file_path}' eliminato.")
+    else:
+        print(f"Il file '{file_path}' non esiste.")
+
+    print("=" * 50)
+
     methods, clean_methods = process_file(file_name, language)
     if (methods is None) or (clean_methods is None):
         print("Something went wrong")
@@ -49,61 +69,9 @@ def main():
 
     print("=" * 50)
 
-    round_robin_selection(num_elements)
-    print("")
+    process_and_save("analysis_output/complete_analysis.json", "selected_methods.json", num_elements)
+    print("Selezione metodi completata")
     print("=" * 50)
-    #aggiungere metodo per scelta automatica
-
-# TODO fix
-def round_robin_selection(n):
-
-    with open("analysis_output/complete_analysis.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    cluster_data = data.get("detailed_results", {}).get("cluster_analysis", {})
-
-    selected = {k: {"method_count": 0, "avg_complexity": 0.0, "avg_lines": 0.0,
-                    "methods": [], "characteristics": v["characteristics"]}
-                for k, v in cluster_data.items()}
-
-    clusters = [k for k in cluster_data if cluster_data[k]["methods"]]
-    cluster_cycle = cycle(clusters)
-    method_count = 0
-
-    while method_count < n and clusters:
-        current = next(cluster_cycle)
-        if cluster_data[current]["methods"]:
-            method = cluster_data[current]["methods"].pop(0)
-            selected[current]["methods"].append(method)
-            method_count += 1
-        # Rimuovi cluster vuoti dal ciclo
-        clusters = [c for c in clusters if cluster_data[c]["methods"]]
-        cluster_cycle = cycle(clusters)
-
-    clusters_to_delete = []
-    for k in selected:
-        methods = selected[k]["methods"]
-        count = len(methods)
-        if count > 0:
-            orig = cluster_data[k]
-            selected[k]["method_count"] = count
-            # selected[k]["avg_complexity"] = orig["avg_complexity"]
-            # selected[k]["avg_lines"] = orig["avg_lines"]
-        else:
-            clusters_to_delete.append(k)
-
-    # Rimuove i cluster vuoti dopo l’iterazione
-    for k in clusters_to_delete:
-        del selected[k]
-
-    output_data = {
-        "selected_methods": {
-            "cluster_analysis": selected
-        }
-    }
-
-    with open("selected_methods.json", "w", encoding="utf-8") as f:
-        json.dump(output_data, f, indent=2, ensure_ascii=False)
 
 
 def get_language(file_name, lang_arg=None):
