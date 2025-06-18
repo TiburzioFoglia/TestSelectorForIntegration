@@ -8,6 +8,9 @@ import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import KMeans
+from sklearn.neighbors import NearestNeighbors
 
 
 class CodeBERTAnalyzer:
@@ -82,13 +85,7 @@ class CodeBERTAnalyzer:
         else:
             raise ValueError(f"Metodo non supportato: {method}")
 
-    def _dbscan_clustering(self, embeddings: np.ndarray, eps: float = None, min_samples: int = 2) -> np.ndarray:
-        from sklearn.cluster import DBSCAN
-
-        # Auto-determina eps se non specificato
-        if eps is None:
-            eps = self._estimate_optimal_eps(embeddings, min_samples)
-            print(f"NO Epsilon passed, using: {eps:.4f}")
+    def _dbscan_clustering(self, embeddings: np.ndarray, eps: float = 0.05, min_samples: int = 2) -> np.ndarray:
 
         # Usa distanza coseno per embeddings
         dbscan = DBSCAN(eps=eps, min_samples=min_samples, metric='cosine')
@@ -103,26 +100,73 @@ class CodeBERTAnalyzer:
         return cluster_labels
 
     def _kmeans_clustering(self, embeddings: np.ndarray, n_clusters: int) -> np.ndarray:
-        from sklearn.cluster import KMeans
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         return kmeans.fit_predict(embeddings)
 
-    def _estimate_optimal_eps(self, embeddings: np.ndarray, min_samples: int) -> floating[Any]:
-        from sklearn.neighbors import NearestNeighbors
+    def _calculate_optimal_eps(self, embeddings: np.ndarray, k: int = None) -> floating[Any] | int | Any:
+        n_samples = len(embeddings)
 
-        # Calcola distanze ai k-esimi vicini più prossimi
-        neighbors = NearestNeighbors(n_neighbors=min_samples, metric='cosine')
-        neighbors_fit = neighbors.fit(embeddings)
-        distances, indices = neighbors_fit.kneighbors(embeddings)
+        # Determina k automaticamente se non specificato
+        if k is None:
+            k = max(2, min(4, n_samples // 20))  # Tra 2 e 4, basato sulla dimensione
 
-        # Ordina le distanze al min_samples-esimo vicino
-        distances = np.sort(distances[:, min_samples - 1], axis=0)
+        print(f"Calcolo eps ottimale con k={k}")
 
-        # Trova il "gomito" nella curva delle distanze
-        # Usa il 90° percentile come euristica
-        optimal_eps = np.percentile(distances, 90)
+        # Calcola le distanze k-nearest neighbor
+        try:
+            nbrs = NearestNeighbors(n_neighbors=k + 1, metric='cosine').fit(embeddings)
+            distances, indices = nbrs.kneighbors(embeddings)
 
-        return optimal_eps
+            # Prendi la distanza al k-esimo vicino (ignora il punto stesso)
+            k_distances = distances[:, k]
+            k_distances = np.sort(k_distances)
+
+            # Trova il "gomito" usando il metodo della derivata seconda
+            optimal_eps = self._find_elbow_point(k_distances)
+
+            # Fallback se l'eps calcolato è troppo estremo
+            median_dist = np.median(k_distances)
+            if optimal_eps > median_dist * 3 or optimal_eps < median_dist * 0.1:
+                print(f"Eps calcolato ({optimal_eps:.4f}) sembra estremo, uso mediana: {median_dist:.4f}")
+                optimal_eps = median_dist
+
+            return optimal_eps
+
+        except Exception as e:
+            print(f"Errore nel calcolo dell'eps ottimale: {e}")
+            # Fallback: usa la mediana delle distanze euclidee
+            from scipy.spatial.distance import pdist
+            distances = pdist(embeddings, metric='cosine')
+            return np.median(distances)
+
+    def _find_elbow_point(self, distances: np.ndarray) -> floating[Any] | int | Any:
+        n_points = len(distances)
+        if n_points < 10:
+            # Per dataset piccoli, usa il 75° percentile
+            return np.percentile(distances, 75)
+
+        # Calcola la derivata seconda per trovare il punto di maggior curvatura
+        # Smoothing per ridurre il rumore
+        window_size = max(3, n_points // 20)
+        if window_size % 2 == 0:
+            window_size += 1
+
+        # Media mobile per smoothing
+        smoothed = np.convolve(distances, np.ones(window_size) / window_size, mode='same')
+
+        # Calcola le derivate
+        first_derivative = np.gradient(smoothed)
+        second_derivative = np.gradient(first_derivative)
+
+        # Trova il punto di massima curvatura (massimo della derivata seconda)
+        # Ignora i primi e ultimi 10% per evitare effetti di bordo
+        start_idx = max(1, n_points // 10)
+        end_idx = min(n_points - 1, n_points - n_points // 10)
+
+        search_range = slice(start_idx, end_idx)
+        elbow_idx = start_idx + np.argmax(second_derivative[search_range])
+
+        return elbow_idx
 
     def analyze_code_complexity(self, code_snippets: List[str]) -> List[Dict]:
         complexity_metrics = []
@@ -211,14 +255,18 @@ class CodeBERTAnalyzer:
     def _robust_clustering(self, embeddings: np.ndarray, max_iterations: int = 6) -> np.ndarray:
         n_samples = len(embeddings)
 
+        # Calcola eps ottimale usando k-distance
+        optimal_eps = self._calculate_optimal_eps(embeddings)
+        print(f"Eps ottimale calcolato: {optimal_eps:.4f}")
+
         # Parametri DBSCAN da testare progressivamente
         dbscan_configs = [
-            {'eps': 0.5, 'min_samples': max(2, n_samples // 10)},   # Configurazione standard
-            {'eps': 0.4, 'min_samples': max(2, n_samples // 15)},   # Più permissivo
-            {'eps': 0.3, 'min_samples': max(2, n_samples // 20)},   # Ancora più permissivo
-            {'eps': 0.2, 'min_samples': 2},                         # Molto permissivo ma almeno 2 elementi
-            {'eps': 0.6, 'min_samples': max(2, n_samples // 8)},    # Eps più alto
-            {'eps': 0.1, 'min_samples': 2},                         # Ultima chance con eps molto basso
+            {'eps': optimal_eps, 'min_samples': max(2, n_samples // 10)},           # Configurazione ottimale
+            {'eps': optimal_eps * 0.8, 'min_samples': max(2, n_samples // 15)},     # Più restrittivo
+            {'eps': optimal_eps * 1.2, 'min_samples': max(2, n_samples // 20)},     # Più permissivo
+            {'eps': optimal_eps * 0.6, 'min_samples': 2},                           # Molto restrittivo
+            {'eps': optimal_eps * 1.5, 'min_samples': max(2, n_samples // 8)},      # Molto permissivo
+            {'eps': optimal_eps * 0.4, 'min_samples': 2},                           # Ultima chance restrittiva
         ]
 
         best_result = None
@@ -285,7 +333,6 @@ class CodeBERTAnalyzer:
 
 
     def _is_clustering_satisfactory(self, result_info: Dict) -> bool:
-        """Determina se il clustering è soddisfacente"""
         return (
                 result_info['n_clusters'] >= 2 and  # Almeno 2 cluster
                 result_info['outlier_percentage'] <= 30 and  # Non troppi outliers

@@ -68,7 +68,7 @@ def main():
         print("Analisi fallita")
 
     print("=" * 50)
-
+    print("Inizio selezione metodi ...")
     process_and_save("analysis_output/complete_analysis.json", "selected_methods.json", num_elements)
     print("Selezione metodi completata")
     print("=" * 50)
