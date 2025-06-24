@@ -1,6 +1,6 @@
 import re
 from typing import List, Optional
-from extraction_classes.base_classes import LanguageParser, MethodInfo, Language
+from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Language
 
 
 class PHPParser(LanguageParser):

@@ -3,11 +3,10 @@ import os
 import sys
 import shutil
 
-from codebert_analyzer import CodeBERTAnalyzer
-from extraction_classes.base_classes import Language
-from extraction_classes.method_extractor import MultiLanguageMethodExtractor
-from save_results import SaveResults
-from method_selector import process_and_save
+from src.analysis_classes.code_analyzer import ComprehensiveCodeAnalyzer
+from src.extraction_classes.base_classes import Language
+from src.extraction_classes.method_extractor import MultiLanguageMethodExtractor
+from src.method_selector import process_and_save
 
 LANGUAGES = {
     '.cs': Language.CSHARP,
@@ -38,7 +37,6 @@ def main():
 
     # Prima di continuare elimino cartella analisi se esiste
     folder_path = 'analysis_output'
-    file_path = 'selected_methods.json'
     print(f"Pulizia dati di precedenti computazioni.")
 
     if os.path.exists(folder_path) and os.path.isdir(folder_path):
@@ -47,29 +45,21 @@ def main():
     else:
         print(f"La cartella '{folder_path}' non esiste.")
 
-    if os.path.exists(file_path) and os.path.isfile(file_path):
-        os.remove(file_path)
-        print(f"File '{file_path}' eliminato.")
-    else:
-        print(f"Il file '{file_path}' non esiste.")
-
     print("=" * 50)
 
-    methods, clean_methods = process_file(file_name, language)
+    methods, clean_methods = process_file(file_name, language, folder_path)
     if (methods is None) or (clean_methods is None):
         print("Something went wrong")
         sys.exit(1)
     print("=" * 50)
 
-    results = codebert_analysis(methods,clean_methods)
-    if results:
-        print("\nAnalisi completata con successo!")
-    else:
-        print("Analisi fallita")
+
+    print("Inizio analisi metodi ...")
+    cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'),folder_path)
 
     print("=" * 50)
     print("Inizio selezione metodi ...")
-    process_and_save("analysis_output/complete_analysis.json", "selected_methods.json", num_elements)
+    process_and_save("analysis_output/comprehensive_analysis_results.json", "analysis_output/selected_methods.json", num_elements)
     print("Selezione metodi completata")
     print("=" * 50)
 
@@ -137,35 +127,15 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
     return test_methods_with_mocks, clean_methods
 
 
-def codebert_analysis(methods: list,clean_methods: list, output_dir: str = "analysis_output"):
-    print("Inizializzazione CodeBERT...")
-    codebert_analyzer = CodeBERTAnalyzer()
+def cluster_analysis(input_file: str, output_dir: str):
+    # Inizializza l'analyzer
+    analyzer = ComprehensiveCodeAnalyzer()
 
-    print("Calcolo embeddings...")
-    embeddings = codebert_analyzer.get_code_embeddings(clean_methods)
+    # Esegui analisi completa
+    results = analyzer.analyze_extracted_methods(input_file,output_dir)
 
-    methods_info = []
-    for i, method in enumerate(methods):
-        methods_info.append({
-            'name': method.name,
-            'body': method.body,
-            'attributes': method.attributes,
-            'access_modifier': method.access_modifier,
-            'line_start': method.line_start,
-            'line_end': method.line_end,
-            'clean_body': clean_methods[i]
-        })
-
-    # Genera analisi completa
-    print("Generazione report di analisi...")
-    results = codebert_analyzer.generate_analysis_report(methods_info, embeddings)
-
-    # Salva tutto nella directory di output
-    results_saver = SaveResults()
-    results_saver.save_complete_results(results, methods_info, output_dir)
-
+    print("\nAnalisi completata con successo!")
     return results
-
 
 
 

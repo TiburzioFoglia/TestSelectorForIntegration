@@ -1,15 +1,15 @@
 import re
 from typing import List, Dict
-from extraction_classes.base_classes import Language, MethodInfo
+from src.extraction_classes.base_classes import Language, MethodInfo
 
 # Import dei parser specifici
-from extraction_classes.parsers.csharp_parser import CSharpParser
-from extraction_classes.parsers.python_parser import PythonParser
-from extraction_classes.parsers.java_parser import JavaParser
-from extraction_classes.parsers.javascript_parser import JavaScriptParser
-from extraction_classes.parsers.php_parser import PHPParser
-from extraction_classes.parsers.ruby_parser import RubyParser
-from extraction_classes.parsers.go_parser import GoParser
+from src.extraction_classes.parsers.csharp_parser import CSharpParser
+from src.extraction_classes.parsers.python_parser import PythonParser
+from src.extraction_classes.parsers.java_parser import JavaParser
+from src.extraction_classes.parsers.javascript_parser import JavaScriptParser
+from src.extraction_classes.parsers.php_parser import PHPParser
+from src.extraction_classes.parsers.ruby_parser import RubyParser
+from src.extraction_classes.parsers.go_parser import GoParser
 
 
 class MultiLanguageMethodExtractor:
