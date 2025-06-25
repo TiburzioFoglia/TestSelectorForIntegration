@@ -4,27 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Fixed dbscan and epsilon methods">
-      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/extraction_classes/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/method_selector.py" afterDir="false" />
+    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/codebert_analyzer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/base_classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/base_classes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/extractor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/method_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/method_extractor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/csharp_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/csharp_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/go_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/go_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/java_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/java_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/javascript_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/javascript_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/php_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/php_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/python_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/python_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extraction_classes/parsers/ruby_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/ruby_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/method_selector.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/save_results.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/save_results.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,24 +33,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.cSharpExtractor.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.method_selector.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/simon/PycharmProjects/TestsSelector/src/analysis_classes",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.cSharpExtractor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.method_selector.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/simon/PycharmProjects/TestsSelector/src/analysis_classes&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\src\analysis_classes" />
@@ -114,7 +95,8 @@
       <workItem from="1750238413410" duration="11065000" />
       <workItem from="1750269747764" duration="621000" />
       <workItem from="1750339104240" duration="2279000" />
-      <workItem from="1750769651958" duration="21097000" />
+      <workItem from="1750769651958" duration="21495000" />
+      <workItem from="1750885197097" duration="1334000" />
     </task>
     <task id="LOCAL-00001" summary="Added parsers, refactored code&#10;Added parsers for the majority of the programming languages compatible with codebert.&#10;Refactored the codebert, main pipeline and method extractor classes">
       <option name="closed" value="true" />
@@ -148,7 +130,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750253831974</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers">
+      <option name="closed" value="true" />
+      <created>1750803504344</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1750803504344</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,7 +160,8 @@
     <MESSAGE value="Added test selection" />
     <MESSAGE value="Fixed tests selection and dbscan edge case" />
     <MESSAGE value="Fixed dbscan and epsilon methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed dbscan and epsilon methods" />
+    <MESSAGE value="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
