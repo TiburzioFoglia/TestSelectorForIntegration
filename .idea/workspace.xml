@@ -4,8 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers">
+    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Added missing classes from previous commit">
+      <change beforePath="$PROJECT_DIR$/.idea/TestsSelector.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TestsSelector.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/analysis_classes/cluster_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/analysis_classes/cluster_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/analysis_classes/code_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/analysis_classes/code_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/extraction_classes/method_extractor.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/method_extractor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/extraction_classes/parsers/java_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/java_parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/extraction_classes/parsers/python_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/extraction_classes/parsers/python_parser.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,32 +40,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.cSharpExtractor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.method_selector.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/simon/PycharmProjects/TestsSelector/src/analysis_classes&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.cSharpExtractor.executor": "Run",
+    "Python.main.executor": "Debug",
+    "Python.method_selector.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/simon/PycharmProjects/TestsSelector/Tests",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\simon\PycharmProjects\TestsSelector\Tests" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\src\analysis_classes" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\extraction_classes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\simon\PycharmProjects\TestsSelector\src" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\Tests" />
+      <recent name="C:\Users\simon\PycharmProjects\TestsSelector\src" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\extraction_classes\parsers" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector" />
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\extraction_classes" />
@@ -96,7 +104,9 @@
       <workItem from="1750269747764" duration="621000" />
       <workItem from="1750339104240" duration="2279000" />
       <workItem from="1750769651958" duration="21495000" />
-      <workItem from="1750885197097" duration="1334000" />
+      <workItem from="1750885197097" duration="1864000" />
+      <workItem from="1750932342099" duration="4204000" />
+      <workItem from="1751451197822" duration="14569000" />
     </task>
     <task id="LOCAL-00001" summary="Added parsers, refactored code&#10;Added parsers for the majority of the programming languages compatible with codebert.&#10;Refactored the codebert, main pipeline and method extractor classes">
       <option name="closed" value="true" />
@@ -138,7 +148,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750803504344</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added missing classes from previous commit">
+      <option name="closed" value="true" />
+      <created>1750887056021</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1750887056021</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -161,21 +179,12 @@
     <MESSAGE value="Fixed tests selection and dbscan edge case" />
     <MESSAGE value="Fixed dbscan and epsilon methods" />
     <MESSAGE value="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored cluster analysis classes&#10;Refactored code structure&#10;Added new clustering techniques and metrics&#10;New graphs for outputs&#10;Fixed choice of methods and outliers" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/extraction_classes/method_extractor.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Added missing classes from previous commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added missing classes from previous commit" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TestsSelector$method_selector.coverage" NAME="method_selector Coverage Results" MODIFIED="1750778994862" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/TestsSelector$main.coverage" NAME="main Coverage Results" MODIFIED="1749739757958" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TestsSelector$main.coverage" NAME="main Coverage Results" MODIFIED="1751473202416" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/TestsSelector$cSharpExtractor.coverage" NAME="cSharpExtractor Coverage Results" MODIFIED="1748428619546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -145,21 +145,23 @@ class CodeClusterAnalyzer:
 
         # Calcola le distanze k-nearest neighbor
         try:
-            nbrs = NearestNeighbors(n_neighbors=k + 1, metric=metric).fit(embeddings)
+            nbrs = NearestNeighbors(n_neighbors=k, metric=metric).fit(embeddings)
             distances, indices = nbrs.kneighbors(embeddings)
 
             # Prendi la distanza al k-esimo vicino (ignora il punto stesso)
-            k_distances = distances[:, k]
-            k_distances = np.sort(k_distances)
+            k_distances = np.sort(distances, axis=0)
+            k_distances = k_distances[:, k-1]
 
             # Trova il punto di gomito
             optimal_eps = self._find_elbow_point(k_distances)
 
             # Aggiusta eps basandosi sulla metrica
             if metric == 'cosine':
-                optimal_eps = min(optimal_eps, 0.1)  # Cosine è in [0,1]
+                optimal_eps = min(optimal_eps, 0.01)  # Cosine è in [0,1]
+            elif metric == 'euclidean':
+                optimal_eps = min(optimal_eps, 1.0)
             elif metric == 'manhattan':
-                optimal_eps = min(optimal_eps * 1.2, 1.0)  # Manhattan tende ad avere distanze maggiori
+                optimal_eps = min(optimal_eps * 1.5, 5.0)  # Manhattan tende ad avere distanze maggiori
 
             # Fallback se l'eps calcolato è troppo estremo
             median_dist = np.median(k_distances)
