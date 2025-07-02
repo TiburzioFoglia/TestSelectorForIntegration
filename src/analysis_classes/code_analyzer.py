@@ -26,11 +26,14 @@ class ComprehensiveCodeAnalyzer:
         # Carica i metodi
         try:
             with open(methods_file, 'r', encoding='utf-8') as f:
-                code_snippets = json.load(f)
-            print(f"Caricati {len(code_snippets)} metodi per l'analisi")
+                methods_data = json.load(f)
+            print(f"Caricati {len(methods_data)} metodi per l'analisi")
         except FileNotFoundError:
             print(f"File {methods_file} non trovato. Esegui prima l'estrazione.")
             return
+
+        method_names = [item['name'] for item in methods_data]
+        code_snippets = [item['code'] for item in methods_data]
 
         # Estrai embeddings
         print("\nEstrazione embeddings ...")
@@ -41,7 +44,6 @@ class ComprehensiveCodeAnalyzer:
         complexity_metrics = self.complexity_analyzer.analyze_code_complexity(code_snippets)
 
         # Crea DataFrame
-        method_names = [f'Method_{i}' for i in range(len(code_snippets))]
         df = pd.DataFrame({
             'method_name': method_names,
             'lines_of_code': [m['lines_of_code'] for m in complexity_metrics],
@@ -119,63 +121,7 @@ class ComprehensiveCodeAnalyzer:
         best_labels = np.array(results['best_clustering']['labels'])
         self.create_complexity_analysis_plots(df, best_labels, output_dir)
 
-
-        # Mostra summary dei risultati
-        #self._print_analysis_summary(results, len(code_snippets))
-
         return results
-
-    def _print_analysis_summary(self, results: Dict, n_methods: int):
-        """Stampa un summary dei risultati dell'analisi"""
-
-        print("\n" + "=" * 60)
-        print("== SUMMARY ANALISI COMPREHENSIVE ==")
-        print("=" * 60)
-
-        print(f"📊 Metodi analizzati: {n_methods}")
-
-        # Clustering summary
-        best = results['best_clustering']
-        print(f"🎯 Miglior clustering: {best['algorithm'].upper()} con {best['metric']}")
-
-        # Conta cluster del miglior risultato
-        best_labels = best['labels']
-        if best_labels:
-            unique_clusters = set(best_labels)
-            n_clusters = len(unique_clusters) - (1 if -1 in unique_clusters else 0)
-            n_outliers = sum(1 for l in best_labels if l == -1)
-            print(f"   → {n_clusters} cluster identificati")
-            print(f"   → {n_outliers} metodi outlier ({n_outliers / n_methods * 100:.1f}%)")
-
-        # Complessità summary
-        complexity = results['complexity_summary']
-        print(f"📈 Complessità media:")
-        print(f"   → Ciclomatica: {complexity['avg_cyclomatic']:.1f}")
-        print(f"   → Cognitiva: {complexity['avg_cognitive']:.1f}")
-        print(f"   → Linee di codice: {complexity['avg_lines']:.1f}")
-
-        # Clustering comparison
-        print(f"\n🔍 Confronto algoritmi di clustering:")
-        clustering_results = results['clustering_results']
-
-        for algorithm in clustering_results:
-            print(f"\n   {algorithm.upper()}:")
-            for metric, result in clustering_results[algorithm].items():
-                if result and result['n_clusters'] > 0:
-                    print(f"     {metric}: {result['n_clusters']} cluster, "
-                          f"qualità {result['quality_score']:.3f}")
-
-        # Top similarità
-        print(f"\n🔗 Esempi di metodi simili (metrica cosine):")
-        similarity = results['similarity_analysis'].get('cosine', {})
-        for i, (method, similarities) in enumerate(list(similarity.items())[:3]):
-            if similarities:
-                sim_method, score = similarities[0]
-                print(f"   {method} ↔ {sim_method} (similarità: {score:.3f})")
-
-        print(f"\n💾 Risultati salvati in: analysis_output/comprehensive_analysis_results.json")
-        print("📊 Grafici salvati in: analysis_output/")
-        print("=" * 60)
 
     def create_comparison_plots(self, embeddings: np.ndarray, clustering_results: Dict,
                                 df: pd.DataFrame, output_dir: str):

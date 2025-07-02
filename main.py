@@ -21,11 +21,14 @@ LANGUAGES = {
 def main():
     if len(sys.argv) < 3:
         print("Uso: python main.py file_name numero_test [linguaggio_opzionale]")
-        sys.exit(1)
-
-    file_name = sys.argv[1]
-    num_elements = int(sys.argv[2])
-    lang_arg = sys.argv[3] if len(sys.argv) > 3 else None
+        file_name = r".\Tests\UserDetailsServiceAutoConfigurationTests.java"
+        num_elements = 8
+        lang_arg = None
+        # sys.exit(1)
+    else:
+        file_name = sys.argv[1]
+        num_elements = int(sys.argv[2])
+        lang_arg = sys.argv[3] if len(sys.argv) > 3 else None
 
     language = get_language(file_name, lang_arg)
 
@@ -47,8 +50,8 @@ def main():
 
     print("=" * 50)
 
-    methods, clean_methods = process_file(file_name, language, folder_path)
-    if (methods is None) or (clean_methods is None):
+    methods_info = process_file(file_name, language, folder_path)
+    if methods_info is None:
         print("Something went wrong")
         sys.exit(1)
     print("=" * 50)
@@ -116,15 +119,32 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
     else:
         print(f"Identificati {len(test_methods_with_mocks)} metodi di test con mock")
 
+    print("Eliminando dai metodi elementi non mock...")
+
+    test_methods_with_mocks_only = extractor_instance.strip_methods_to_mock_lines(test_methods_with_mocks)
+    if not test_methods_with_mocks_only:
+        print("Qualcosa è andato storto nella creazione di metodi con solo mock")
+        return None, None
+    else:
+        print(f"Ottenuti {len(test_methods_with_mocks_only)} metodi di test con solo mock")
+
 
     print("Preparazione per CodeBERT...")
-    clean_methods = extractor_instance.methods_to_codebert_format(test_methods_with_mocks)
+    clean_methods = extractor_instance.methods_to_codebert_format(test_methods_with_mocks_only)
+
+    if len(test_methods_with_mocks_only) != len(clean_methods):
+        raise ValueError("Le liste di informazioni sui metodi e dei corpi non hanno la stessa lunghezza!")
+
+    methods_info = [
+    {"name": method_info.name, "code": body}
+    for method_info, body in zip(test_methods_with_mocks_only, clean_methods)
+    ]
 
     methods_file = os.path.join(output_dir, "extracted_methods.json")
     with open(methods_file, 'w', encoding='utf-8') as f:
-        json.dump(clean_methods, f, indent=2, ensure_ascii=False)
+        json.dump(methods_info, f, indent=2, ensure_ascii=False)
     print("Salvati metodi per CodeBERT come extracted_methods.json")
-    return test_methods_with_mocks, clean_methods
+    return methods_info
 
 
 def cluster_analysis(input_file: str, output_dir: str):
