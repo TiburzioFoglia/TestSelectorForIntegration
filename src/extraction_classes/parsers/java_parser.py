@@ -80,5 +80,6 @@ class JavaParser(LanguageParser):
             '.thenReturn(',
             'mock.',
             'Mock.',
-            'Mock<'
+            'Mock<',
+            'Bean'
         ]
