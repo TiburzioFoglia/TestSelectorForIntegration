@@ -7,16 +7,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from . import embedder_handler
 from .cluster_analyzer import CodeClusterAnalyzer
 from .complexity_analyzer import CodeComplexityAnalyzer
-from .codebert_embedder import CodeBERTEmbedder
 
 
 class ComprehensiveCodeAnalyzer:
     """Classe principale che coordina tutte le analisi"""
 
-    def __init__(self):
-        self.embedder = CodeBERTEmbedder()
+    # def __init__(self):
+    #     self.embedder = CodeBERTEmbedder()
+    #     self.cluster_analyzer = CodeClusterAnalyzer()
+    #     self.complexity_analyzer = CodeComplexityAnalyzer()
+
+    def __init__(self, embedder_name: str):
+        self.embedder = embedder_handler.get_embedder(embedder_name)
         self.cluster_analyzer = CodeClusterAnalyzer()
         self.complexity_analyzer = CodeComplexityAnalyzer()
 

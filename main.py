@@ -62,7 +62,8 @@ def main():
 
     print("=" * 50)
     print("Inizio selezione metodi ...")
-    process_and_save("analysis_output/comprehensive_analysis_results.json", "analysis_output/selected_methods.json", num_elements)
+    process_and_save("analysis_output/comprehensive_analysis_results.json",
+                     "analysis_output/selected_methods.json", num_elements)
     print("Selezione metodi completata")
     print("=" * 50)
 
@@ -121,6 +122,8 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
 
     print("Eliminando dai metodi elementi non mock...")
 
+    # Switch line based on need of stripped methods
+    # test_methods_with_mocks_only = test_methods_with_mocks
     test_methods_with_mocks_only = extractor_instance.strip_methods_to_mock_lines(test_methods_with_mocks)
     if not test_methods_with_mocks_only:
         print("Qualcosa è andato storto nella creazione di metodi con solo mock")
@@ -149,7 +152,12 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
 
 def cluster_analysis(input_file: str, output_dir: str):
     # Inizializza l'analyzer
-    analyzer = ComprehensiveCodeAnalyzer()
+
+    # analyzer = ComprehensiveCodeAnalyzer("codeBert")
+    # analyzer = ComprehensiveCodeAnalyzer("codeT5")
+    # analyzer = ComprehensiveCodeAnalyzer("polyCoder")
+    # analyzer = ComprehensiveCodeAnalyzer("sentenceTransformer")
+    analyzer = ComprehensiveCodeAnalyzer("unixCoder")
 
     # Esegui analisi completa
     results = analyzer.analyze_extracted_methods(input_file,output_dir)

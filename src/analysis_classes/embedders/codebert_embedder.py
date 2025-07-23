@@ -4,7 +4,7 @@ import numpy as np
 from typing import List
 
 class CodeBERTEmbedder:
-    """Classe responsabile solo dell'estrazione degli embeddings"""
+    """Classe per estrarre embeddings con CodeBERT"""
 
     def __init__(self, model_name="microsoft/codebert-base"):
         print(f"Caricamento del modello {model_name}...")
@@ -21,10 +21,8 @@ class CodeBERTEmbedder:
         print(f"Elaborazione di {len(code_snippets)} snippet di codice...")
 
         for i, code in enumerate(code_snippets):
-
             print(f"Processati {i}/{len(code_snippets)} snippet")
 
-            # Tokenizza il codice
             inputs = self.tokenizer(
                 code,
                 return_tensors='pt',
