@@ -25,17 +25,21 @@ class ComprehensiveCodeAnalyzer:
         self.cluster_analyzer = CodeClusterAnalyzer()
         self.complexity_analyzer = CodeComplexityAnalyzer()
 
-    def analyze_extracted_methods(self, methods_file: str, output_dir: str):
+    def analyze_extracted_methods(self, methods_file: str, output_dir: str, complete_methods_file: str = None):
         """Analisi completa dei metodi estratti"""
 
-        # Carica i metodi
         try:
             with open(methods_file, 'r', encoding='utf-8') as f:
                 methods_data = json.load(f)
             print(f"Caricati {len(methods_data)} metodi per l'analisi")
+
+            if complete_methods_file is not None:
+                with open(complete_methods_file, 'r', encoding='utf-8') as f:
+                    complete_methods_data = json.load(f)
+
         except FileNotFoundError:
-            print(f"File {methods_file} non trovato. Esegui prima l'estrazione.")
-            return
+            print(f"File {methods_file} or {complete_methods_data} non trovato. Esegui prima l'estrazione.")
+            return None
 
         method_names = [item['name'] for item in methods_data]
         code_snippets = [item['code'] for item in methods_data]
@@ -48,10 +52,17 @@ class ComprehensiveCodeAnalyzer:
         print("\nAnalisi complessita' ...")
         complexity_metrics = self.complexity_analyzer.analyze_code_complexity(code_snippets)
 
+        if complete_methods_file is not None:
+            complete_code_snippets = [item['code'] for item in complete_methods_data]
+            complete_complexity_metrics = self.complexity_analyzer.analyze_code_complexity(complete_code_snippets)
+            lines_of_code = [m['lines_of_code'] for m in complete_complexity_metrics]
+        else:
+            lines_of_code = [m['lines_of_code'] for m in complexity_metrics]
+
         # Crea DataFrame
         df = pd.DataFrame({
             'method_name': method_names,
-            'lines_of_code': [m['lines_of_code'] for m in complexity_metrics],
+            'lines_of_code': lines_of_code,
             'cyclomatic_complexity': [m['cyclomatic_complexity'] for m in complexity_metrics],
             'nesting_depth': [m['nesting_depth'] for m in complexity_metrics],
             'method_calls': [m['method_calls'] for m in complexity_metrics],

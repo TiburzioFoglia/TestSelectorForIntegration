@@ -87,7 +87,11 @@ def main():
 
 
     print("Inizio analisi metodi ...")
-    cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'),folder_path, analyzer)
+    if mocks_only:
+        cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'), folder_path, analyzer,
+                         os.path.join(folder_path, 'complete_extracted_methods.json'))
+    else:
+        cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'), folder_path, analyzer)
 
     print("=" * 50)
     print("Inizio selezione metodi ...")
@@ -162,36 +166,40 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
 
     print("Preparazione per CodeBERT...")
     clean_methods = extractor_instance.methods_to_codebert_format(filtered_test_methods)
+    methods_info = create_extracted_methods_file(filtered_test_methods, clean_methods,
+                                                 output_dir, "extracted_methods.json")
 
+    if mocks_only:
+        complete_clean_methods = extractor_instance.methods_to_codebert_format(test_methods_with_mocks)
+        create_extracted_methods_file(filtered_test_methods, complete_clean_methods,
+                                      output_dir, "complete_extracted_methods.json")
+
+    return methods_info
+
+def create_extracted_methods_file(filtered_test_methods: list, clean_methods: list, output_dir: str, file_name: str):
     if len(filtered_test_methods) != len(clean_methods):
         raise ValueError("Le liste di informazioni sui metodi e dei corpi non hanno la stessa lunghezza!")
 
     methods_info = [
-    {"name": method_info.name, "code": body}
-    for method_info, body in zip(filtered_test_methods, clean_methods)
+        {"name": method_info.name, "code": body}
+        for method_info, body in zip(filtered_test_methods, clean_methods)
     ]
 
-    methods_file = os.path.join(output_dir, "extracted_methods.json")
+    methods_file = os.path.join(output_dir, file_name)
     with open(methods_file, 'w', encoding='utf-8') as f:
         json.dump(methods_info, f, indent=2, ensure_ascii=False)
-    print("Salvati metodi per CodeBERT come extracted_methods.json")
+
+    print(f"Salvati metodi per CodeBERT come {file_name}")
     return methods_info
 
-
-def cluster_analysis(input_file: str, output_dir: str, analyzer: str):
+def cluster_analysis(input_file: str, output_dir: str, analyzer: str, complete_methods_file: str = None):
     # Inizializza l'analyzer
     analyzer = ComprehensiveCodeAnalyzer(analyzer)
 
-    # analyzer = ComprehensiveCodeAnalyzer("codeBert")
-    # analyzer = ComprehensiveCodeAnalyzer("graphCodeBert")
-    # analyzer = ComprehensiveCodeAnalyzer("codeT5")
-    # analyzer = ComprehensiveCodeAnalyzer("polyCoder")
-    # analyzer = ComprehensiveCodeAnalyzer("sentenceTransformer")
-    # analyzer = ComprehensiveCodeAnalyzer("unixCoder")
-    # analyzer = ComprehensiveCodeAnalyzer("starCoder2")
-
-    # Analisi completa
-    results = analyzer.analyze_extracted_methods(input_file,output_dir)
+    if complete_methods_file is not None:
+        results = analyzer.analyze_extracted_methods(input_file,output_dir, complete_methods_file)
+    else:
+        results = analyzer.analyze_extracted_methods(input_file,output_dir)
 
     print("\nAnalisi completata con successo!")
     return results
