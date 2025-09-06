@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Language
 
 
@@ -88,3 +88,11 @@ class PHPParser(LanguageParser):
             '->once()',
             '->times(',
         ]
+
+    def get_comments_config(self) -> Dict[str, Any]:
+        return {
+            'comment_symbol': '//',
+            'method_regex': re.compile(
+            r'^\s*(?:public|private|protected|static|abstract|final|\s)*\s*function\s+(?:&)?\s*(?P<method_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*\('
+            )
+        }

@@ -1,7 +1,6 @@
-# FILE: python_parser.py
-
+import re
 import ast
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Language
 
 
@@ -184,3 +183,9 @@ class PythonParser(LanguageParser):
             r'with\s+patch\b',
             r'with\s+mock\.patch\b',
         ]
+
+    def get_comments_config(self) -> Dict[str, Any]:
+        return {
+            'comment_symbol': '#',
+            'method_regex': re.compile(r'^\s*def\s+(?P<method_name>[a-zA-Z_0-9]+)\s*\(')
+        }

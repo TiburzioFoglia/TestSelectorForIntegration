@@ -1,5 +1,5 @@
 import re
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Language
 
 
@@ -81,3 +81,11 @@ class CSharpParser(LanguageParser):
             '[Mock]',
             '.CallBase',
         ]
+
+    def get_comments_config(self) -> Dict[str, Any]:
+        return {
+        'comment_symbol': '//',
+        'method_regex': re.compile(
+            r'^\s*(public|private|protected|internal|static|async|virtual|override|\s)*\s*[\w\<\>\[\]]+\s+(?P<method_name>[a-zA-Z_0-9]+)\s*\('
+            )
+        }

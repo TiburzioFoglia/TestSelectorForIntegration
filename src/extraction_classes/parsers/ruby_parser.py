@@ -1,4 +1,5 @@
-from typing import List, Optional
+import re
+from typing import List, Optional, Dict, Any
 from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Language
 
 
@@ -92,3 +93,9 @@ class RubyParser(LanguageParser):
             'stub(',
             'stub_request(',
         ]
+
+    def get_comments_config(self) -> Dict[str, Any]:
+        return {
+        'comment_symbol': '#',
+        'method_regex': re.compile(r'^\s*def\s+(?P<method_name>[a-zA-Z_0-9_!?=]+)')
+        }

@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import sys
@@ -19,28 +20,56 @@ LANGUAGES = {
 }
 
 def main():
-    if len(sys.argv) < 3:
-        print("Uso: python main.py file_name numero_test [linguaggio_opzionale]")
-        file_name = r".\Tests\UserDetailsServiceAutoConfigurationTests.java"
-        num_elements = 8
-        lang_arg = None
-        # sys.exit(1)
-    else:
-        file_name = sys.argv[1]
-        num_elements = int(sys.argv[2])
-        lang_arg = sys.argv[3] if len(sys.argv) > 3 else None
 
-    language = get_language(file_name, lang_arg)
+    ANALYZERS = ["codeBert", "graphCodeBert", "codeT5", "polyCoder", "sentenceTransformer", "unixCoder", "starCoder2"]
+
+    parser = argparse.ArgumentParser(
+        description="Run automated tests selection on a tests file."
+    )
+    parser.add_argument("file_name", help="Target tests file")
+    parser.add_argument(
+        "n_test",
+        type=int,
+        nargs="?",
+        default=10,
+        help="Number of tests to select (default: 10)"
+    )
+    parser.add_argument(
+        "--code-analyzer",
+        choices=ANALYZERS,
+        default="codeBert",
+        help=f"Choose a code analyzer (default: codeBert, options: {', '.join(ANALYZERS)})"
+    )
+    parser.add_argument(
+        "--mocks-only",
+        action="store_true",
+        help="Run tests selection taking into consideration mocks only"
+    )
+
+    args = parser.parse_args()
+
+    file_name = args.file_name
+    num_elements = args.n_test
+    analyzer = args.code_analyzer
+    mocks_only = args.mocks_only
 
     print("=" * 50)
-    print(f"File: {file_name}")
-    print(f"Numero elementi: {num_elements}")
+    print("File:", file_name)
+    print("N Tests:", num_elements)
+    print(f"Analyzer: {analyzer}")
+    print("Mocks only:", mocks_only)
+
+    language = get_language(args.file_name)
+
     print(f"Linguaggio selezionato: {language.value}")
     print("=" * 50)
 
     # Prima di continuare elimino cartella analisi se esiste
     folder_path = 'analysis_output'
     print(f"Pulizia dati di precedenti computazioni.")
+
+    comprehensive_analysis_path = "analysis_output/comprehensive_analysis_results.json"
+    selected_methods_path = "analysis_output/selected_methods.json"
 
     if os.path.exists(folder_path) and os.path.isdir(folder_path):
         shutil.rmtree(folder_path)
@@ -50,7 +79,7 @@ def main():
 
     print("=" * 50)
 
-    methods_info = process_file(file_name, language, folder_path)
+    methods_info = process_file(file_name, language, folder_path, mocks_only)
     if methods_info is None:
         print("Something went wrong")
         sys.exit(1)
@@ -58,34 +87,31 @@ def main():
 
 
     print("Inizio analisi metodi ...")
-    cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'),folder_path)
+    cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'),folder_path, analyzer)
 
     print("=" * 50)
     print("Inizio selezione metodi ...")
-    process_and_save("analysis_output/comprehensive_analysis_results.json",
-                     "analysis_output/selected_methods.json", num_elements)
+    process_and_save(comprehensive_analysis_path, selected_methods_path, num_elements)
     print("Selezione metodi completata")
     print("=" * 50)
 
 
-def get_language(file_name, lang_arg=None):
-    if lang_arg:
-        lang_str = lang_arg.lower()
-        for lang in Language:
-            if lang.value == lang_str:
-                return lang
-        print(f"[ERRORE] Linguaggio non supportato: '{lang_arg}'")
+    print("Inizio creazione file con metodi commentati ...")
+    create_commented_copy(file_name, comprehensive_analysis_path, selected_methods_path, language)
+    print("=" * 50)
+
+
+def get_language(file_name):
+
+    ext = os.path.splitext(file_name)[1].lower()
+    lang = LANGUAGES.get(ext)
+    if lang is None:
+        print(f"[ERRORE] Estensione file '{ext}' non riconosciuta.")
         sys.exit(1)
-    else:
-        ext = os.path.splitext(file_name)[1].lower()
-        lang = LANGUAGES.get(ext)
-        if lang is None:
-            print(f"[ERRORE] Estensione file '{ext}' non riconosciuta.")
-            sys.exit(1)
-        return lang
+    return lang
 
 
-def process_file(file_path: str,language: Language, output_dir: str = "analysis_output"):
+def process_file(file_path: str,language: Language, output_dir: str = "analysis_output", mocks_only: bool = False):
     print(f"Processando file: {file_path}")
 
     if not os.path.exists(file_path):
@@ -122,25 +148,27 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
 
     print("Eliminando dai metodi elementi non mock...")
 
-    # Switch line based on need of stripped methods
-    # test_methods_with_mocks_only = test_methods_with_mocks
-    test_methods_with_mocks_only = extractor_instance.strip_methods_to_mock_lines(test_methods_with_mocks)
-    if not test_methods_with_mocks_only:
+    if mocks_only:
+        filtered_test_methods = extractor_instance.strip_methods_to_mock_lines(test_methods_with_mocks)
+    else:
+        filtered_test_methods = test_methods_with_mocks
+
+    if not filtered_test_methods:
         print("Qualcosa è andato storto nella creazione di metodi con solo mock")
         return None, None
     else:
-        print(f"Ottenuti {len(test_methods_with_mocks_only)} metodi di test con solo mock")
+        print(f"Ottenuti {len(filtered_test_methods)} metodi di test con solo mock")
 
 
     print("Preparazione per CodeBERT...")
-    clean_methods = extractor_instance.methods_to_codebert_format(test_methods_with_mocks_only)
+    clean_methods = extractor_instance.methods_to_codebert_format(filtered_test_methods)
 
-    if len(test_methods_with_mocks_only) != len(clean_methods):
+    if len(filtered_test_methods) != len(clean_methods):
         raise ValueError("Le liste di informazioni sui metodi e dei corpi non hanno la stessa lunghezza!")
 
     methods_info = [
     {"name": method_info.name, "code": body}
-    for method_info, body in zip(test_methods_with_mocks_only, clean_methods)
+    for method_info, body in zip(filtered_test_methods, clean_methods)
     ]
 
     methods_file = os.path.join(output_dir, "extracted_methods.json")
@@ -150,21 +178,104 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
     return methods_info
 
 
-def cluster_analysis(input_file: str, output_dir: str):
+def cluster_analysis(input_file: str, output_dir: str, analyzer: str):
     # Inizializza l'analyzer
+    analyzer = ComprehensiveCodeAnalyzer(analyzer)
 
     # analyzer = ComprehensiveCodeAnalyzer("codeBert")
+    # analyzer = ComprehensiveCodeAnalyzer("graphCodeBert")
     # analyzer = ComprehensiveCodeAnalyzer("codeT5")
     # analyzer = ComprehensiveCodeAnalyzer("polyCoder")
     # analyzer = ComprehensiveCodeAnalyzer("sentenceTransformer")
-    analyzer = ComprehensiveCodeAnalyzer("unixCoder")
+    # analyzer = ComprehensiveCodeAnalyzer("unixCoder")
+    # analyzer = ComprehensiveCodeAnalyzer("starCoder2")
 
-    # Esegui analisi completa
+    # Analisi completa
     results = analyzer.analyze_extracted_methods(input_file,output_dir)
 
     print("\nAnalisi completata con successo!")
     return results
 
+def create_commented_copy(source_file_path: str, analysis_results_path: str, selected_methods_path: str,
+        language: Language, suffix: str = '_commented'):
+
+    try:
+        extractor_instance = MultiLanguageMethodExtractor()
+        extractor_instance.set_language(language)
+        config = extractor_instance.current_parser.get_comments_config()
+        comment_symbol = config['comment_symbol']
+        method_regex = config['method_regex']
+
+        with open(analysis_results_path, 'r') as f:
+            analysis_data = json.load(f)
+        with open(selected_methods_path, 'r') as f:
+            selected_data = json.load(f)
+        with open(source_file_path, 'r') as f:
+            source_lines = f.readlines()
+
+        method_info = {m['method_name']: m for m in analysis_data.get('method_analysis', [])}
+        selected_methods = {m for d in selected_data.values() for m in d.get('methods', [])}
+        methods_to_comment = set(method_info.keys()) - selected_methods
+
+        if not methods_to_comment:
+            print(f"Info: Nessun metodo da commentare. Nessuna copia creata per '{source_file_path}'.")
+            return None
+
+        modified_lines = []
+        i = 0
+        while i < len(source_lines):
+            line = source_lines[i]
+            match = method_regex.search(line)
+
+            if match and (method_name := match.group('method_name')) in methods_to_comment:
+                lines_to_find = method_info[method_name].get('lines_of_code', 1)
+                code_lines_found = 0
+
+                current_pos = i
+                while code_lines_found < lines_to_find and current_pos < len(source_lines):
+                    current_line = source_lines[current_pos]
+                    stripped_line = current_line.strip()
+
+                    if not stripped_line:
+                        modified_lines.append(current_line)  # Preserva le righe vuote per leggibilità
+                    else:
+                        modified_lines.append(f"{comment_symbol} {current_line.rstrip()}\n")
+
+                    # Ma incrementiamo il contatore solo se è codice
+                    is_comment = stripped_line.startswith(comment_symbol)
+                    is_code = not is_comment and stripped_line
+
+                    if is_code:
+                        code_lines_found += 1
+
+                    current_pos += 1
+
+                i = current_pos
+                continue  # Passa alla prossima iterazione del ciclo while
+
+            # Se la riga non è l'inizio di un metodo da commentare, aggiungila normalmente
+            modified_lines.append(line)
+            i += 1
+
+        modified_code = "".join(modified_lines)
+
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+        print(f"Errore durante l'elaborazione dei file: {e}")
+        return None
+
+    try:
+        base_name, extension = os.path.splitext(source_file_path)
+
+        output_file_path = f"{base_name}{suffix}{extension}"
+
+        with open(output_file_path, 'w') as f:
+            f.write(modified_code)
+
+        print(f"Successo! File {output_file_path} creato.")
+
+    except IOError as e:
+        print(f"Errore durante il salvataggio del file: {e}")
+        return None
 
 
 if __name__ == "__main__":

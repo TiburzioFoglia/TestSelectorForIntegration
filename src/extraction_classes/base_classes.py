@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 class Language(Enum):
@@ -48,4 +48,9 @@ class LanguageParser(ABC):
     @abstractmethod
     def get_mock_filters(self) -> List[str]:
         """Restituisce i pattern per identificare i mock nei test"""
+        pass
+
+    @abstractmethod
+    def get_comments_config(self) -> Dict[str, Any]:
+        """Restituisce i pattern per commentare i test non selezionati"""
         pass

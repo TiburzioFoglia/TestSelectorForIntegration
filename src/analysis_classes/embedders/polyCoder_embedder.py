@@ -4,7 +4,7 @@ import numpy as np
 from typing import List
 
 class PolyCoderEmbedder:
-    """Classe per estrarre embeddings con PolyCoder."""
+    """Classe per estrarre embeddings con PolyCoder"""
 
     def __init__(self, model_name="NinedayWang/PolyCoder-2.7B"):
         print(f"Caricamento del modello {model_name}...")
