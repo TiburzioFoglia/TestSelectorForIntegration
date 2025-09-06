@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Added new embedder&#10;Added automatic creation of commented test file&#10;Fixed args">
+    <list default="true" id="845a2ffe-e0c9-4f97-ab5d-65190237233f" name="Changes" comment="Fix file commenter when using only mocks instead of full method bodies">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/analysis_classes/code_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/analysis_classes/code_analyzer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,26 +33,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.ai_studio_code.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cSharpExtractor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.method_selector.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/simon/PycharmProjects/TestsSelector/src&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.ai_studio_code.executor": "Run",
+    "Python.cSharpExtractor.executor": "Run",
+    "Python.main.executor": "Debug",
+    "Python.method_selector.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/simon/PycharmProjects/TestsSelector/src",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\simon\PycharmProjects\TestsSelector\src" />
@@ -129,7 +128,8 @@
       <workItem from="1756916296527" duration="2021000" />
       <workItem from="1756991571465" duration="6640000" />
       <workItem from="1757155861184" duration="3479000" />
-      <workItem from="1757165602824" duration="7941000" />
+      <workItem from="1757165602824" duration="8248000" />
+      <workItem from="1757194162741" duration="310000" />
     </task>
     <task id="LOCAL-00001" summary="Added parsers, refactored code&#10;Added parsers for the majority of the programming languages compatible with codebert.&#10;Refactored the codebert, main pipeline and method extractor classes">
       <option name="closed" value="true" />
@@ -227,7 +227,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757170831855</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Fix file commenter when using only mocks instead of full method bodies">
+      <option name="closed" value="true" />
+      <created>1757176956614</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1757176956614</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,7 +264,8 @@
     <MESSAGE value="Small fix to epsilon calculation" />
     <MESSAGE value="Added more embedding classes to choose from" />
     <MESSAGE value="Added new embedder&#10;Added automatic creation of commented test file&#10;Fixed args" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added new embedder&#10;Added automatic creation of commented test file&#10;Fixed args" />
+    <MESSAGE value="Fix file commenter when using only mocks instead of full method bodies" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix file commenter when using only mocks instead of full method bodies" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/TestsSelector$cSharpExtractor.coverage" NAME="cSharpExtractor Coverage Results" MODIFIED="1748428619546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
