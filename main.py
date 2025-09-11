@@ -104,6 +104,14 @@ def main():
     create_commented_copy(file_name, comprehensive_analysis_path, selected_methods_path, language)
     print("=" * 50)
 
+    selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
+    extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
+
+    cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
+
+    print(f"Risultato della Coverage of Integration Points (CPI): {cpi_result:.2f}%")
+    print("=" * 50)
+
 
 def get_language(file_name):
 
@@ -286,5 +294,58 @@ def create_commented_copy(source_file_path: str, analysis_results_path: str, sel
         return None
 
 
+def calculate_cpi(selected_methods_path: str, extracted_methods_path: str) -> float:
+
+    with open(selected_methods_path, 'r') as f:
+        selected_methods_data = json.load(f)
+
+    with open(extracted_methods_path, 'r') as f:
+        extracted_methods_data = json.load(f)
+
+    # Trova tutti i punti di integrazione unici (Total_Interactions)
+    total_interactions = set()
+    extracted_methods_map = {method['name']: method['code'] for method in extracted_methods_data}
+
+    for method_code in extracted_methods_map.values():
+        interactions = method_code.strip().split('\n')
+        total_interactions.update(interaction for interaction in interactions if interaction)
+
+    # Ottieni la lista di tutti i metodi selezionati
+    selected_method_names = set()
+    for cluster_info in selected_methods_data.values():
+        selected_method_names.update(cluster_info['methods'])
+
+    # Trova i punti di integrazione unici coperti dai metodi selezionati (Selected_Interactions)
+    selected_interactions = set()
+    for method_name in selected_method_names:
+        if method_name in extracted_methods_map:
+            method_code = extracted_methods_map[method_name]
+            interactions = method_code.strip().split('\n')
+            selected_interactions.update(interaction for interaction in interactions if interaction)
+
+    # Calcola il CPI usando la formula
+    num_total_interactions = len(total_interactions)
+    num_selected_interactions = len(selected_interactions)
+
+    print(f"Numero di punti di integrazione unici totali: {num_total_interactions}")
+    # print(f"Punti di integrazione totali: {sorted(list(total_interactions))}\n")
+    print(f"Numero di punti di integrazione unici selezionati: {num_selected_interactions}")
+    # print(f"Punti di integrazione selezionati: {sorted(list(selected_interactions))}\n")
+
+    if num_total_interactions == 0:
+        return 0.0
+
+    cpi = (num_selected_interactions / num_total_interactions) * 100
+
+    return cpi
+
+
 if __name__ == "__main__":
     main()
+    # folder_path = 'analysis_output'
+    # selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
+    # extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
+    #
+    # cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
+    #
+    # print(f"Risultato della Coverage of Integration Points (CPI): {cpi_result:.2f}%")

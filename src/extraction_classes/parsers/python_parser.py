@@ -118,6 +118,10 @@ class MethodVisitor(ast.NodeVisitor):
 
 class PythonParser(LanguageParser):
     """Parser specifico per il linguaggio Python basato su AST."""
+    def __init__(self):
+        self._extraction_pattern = re.compile(
+            r"(?:self\.)?([a-zA-Z_][a-zA-Z0-9_.]*?)\s*(?=\.assert_|\.return_value|\.side_effect|\.spec|=|\.call_args|\.assert_not_called)"
+        )
 
     def get_method_pattern(self) -> str:
         return ""  # Non usato
@@ -189,3 +193,14 @@ class PythonParser(LanguageParser):
             'comment_symbol': '#',
             'method_regex': re.compile(r'^\s*def\s+(?P<method_name>[a-zA-Z_0-9]+)\s*\(')
         }
+
+    def line_contains_mock(self, line: str) -> bool:
+        """Controlla se la riga matcha uno qualsiasi dei filtri di mocking."""
+        return any(re.search(p, line) for p in self.get_mock_filters())
+
+    def extract_mock_subject(self, line: str) -> Optional[str]:
+        """Estrae il soggetto del mock usando il pattern specifico per Python."""
+        match = self._extraction_pattern.search(line)
+        if match:
+            return match.group(1).strip()
+        return None

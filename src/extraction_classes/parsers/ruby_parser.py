@@ -99,3 +99,11 @@ class RubyParser(LanguageParser):
         'comment_symbol': '#',
         'method_regex': re.compile(r'^\s*def\s+(?P<method_name>[a-zA-Z_0-9_!?=]+)')
         }
+
+    def line_contains_mock(self, line: str) -> bool:
+        """Controlla se la riga matcha uno qualsiasi dei filtri di mocking."""
+        return None
+
+    def extract_mock_subject(self, line: str) -> Optional[str]:
+        """Estrae il soggetto del mock usando il pattern specifico per Python."""
+        return None

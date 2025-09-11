@@ -96,3 +96,11 @@ class PHPParser(LanguageParser):
             r'^\s*(?:public|private|protected|static|abstract|final|\s)*\s*function\s+(?:&)?\s*(?P<method_name>[a-zA-Z_][a-zA-Z0-9_]*)\s*\('
             )
         }
+
+    def line_contains_mock(self, line: str) -> bool:
+        """Controlla se la riga matcha uno qualsiasi dei filtri di mocking."""
+        return None
+
+    def extract_mock_subject(self, line: str) -> Optional[str]:
+        """Estrae il soggetto del mock usando il pattern specifico per Python."""
+        return None

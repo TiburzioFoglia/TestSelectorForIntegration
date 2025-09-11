@@ -54,3 +54,13 @@ class LanguageParser(ABC):
     def get_comments_config(self) -> Dict[str, Any]:
         """Restituisce i pattern per commentare i test non selezionati"""
         pass
+
+    @abstractmethod
+    def line_contains_mock(self, line: str) -> bool:
+        """Controlla se la riga matcha uno qualsiasi dei filtri di mocking."""
+        pass
+
+    @abstractmethod
+    def extract_mock_subject(self, line: str) -> Optional[str]:
+        """Estrae il soggetto del mock usando il pattern specifico."""
+        pass

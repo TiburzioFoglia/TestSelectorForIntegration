@@ -171,29 +171,56 @@ class MultiLanguageMethodExtractor:
         parser = self.current_parser
 
         for method in methods:
+            lines = method.body.split('\n')
+            extracted_mocks = []
 
-            # Otteniamo i filtri (stringhe o regex) direttamente dal parser.
-            mock_filters = parser.get_mock_filters()
+            for line in lines:
+                # Chiedi al parser se la riga è rilevante
+                if parser.line_contains_mock(line):
+                    # Se sì, estrae il soggetto
+                    mock_subject = parser.extract_mock_subject(line)
+                    if mock_subject:
+                        extracted_mocks.append(mock_subject)
 
-            mock_lines = []
-            if mock_filters:
-                lines = method.body.split('\n')
-
-                if method.language == Language.PYTHON:
-                    compiled_filters = [re.compile(f) for f in mock_filters]
-                    for line in lines:
-                        if any(p.search(line) for p in compiled_filters):
-                            mock_lines.append(line)
-                else:
-                    for line in lines:
-                        if any(f in line for f in mock_filters):
-                            mock_lines.append(line)
-
-            # Crea una copia profonda per non modificare l'oggetto originale
+            # Crea una copia profonda e aggiorna il corpo del metodo
             new_method_info = deepcopy(method)
-            # Sostituisci il body con le sole righe di mocking
-            new_method_info.body = "\n".join(mock_lines).strip()
-
+            new_method_info.body = "\n".join(extracted_mocks)
             stripped_method_info_list.append(new_method_info)
 
+        # print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+        # print(stripped_method_info_list)
+        # print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+
         return stripped_method_info_list
+
+    # def strip_methods_to_mock_lines(self, methods: List[MethodInfo]) -> List[MethodInfo]:
+    #     stripped_method_info_list = []
+    #     parser = self.current_parser
+    #
+    #     for method in methods:
+    #
+    #         # Otteniamo i filtri (stringhe o regex) direttamente dal parser.
+    #         mock_filters = parser.get_mock_filters()
+    #
+    #         mock_lines = []
+    #         if mock_filters:
+    #             lines = method.body.split('\n')
+    #
+    #             if method.language == Language.PYTHON:
+    #                 compiled_filters = [re.compile(f) for f in mock_filters]
+    #                 for line in lines:
+    #                     if any(p.search(line) for p in compiled_filters):
+    #                         mock_lines.append(line)
+    #             else:
+    #                 for line in lines:
+    #                     if any(f in line for f in mock_filters):
+    #                         mock_lines.append(line)
+    #
+    #         # Crea una copia profonda per non modificare l'oggetto originale
+    #         new_method_info = deepcopy(method)
+    #         # Sostituisci il body con le sole righe di mocking
+    #         new_method_info.body = "\n".join(mock_lines).strip()
+    #
+    #         stripped_method_info_list.append(new_method_info)
+    #
+    #     return stripped_method_info_list
