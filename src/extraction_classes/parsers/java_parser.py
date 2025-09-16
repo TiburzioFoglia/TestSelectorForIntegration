@@ -6,6 +6,18 @@ from src.extraction_classes.base_classes import LanguageParser, MethodInfo, Lang
 class JavaParser(LanguageParser):
     """Parser specifico per il linguaggio Java"""
 
+    def __init__(self):
+
+        self._filters = [re.compile(re.escape(f)) for f in self.get_mock_filters()]
+
+        self._extraction_strategies: List[Dict[str, Any]] = [
+            {
+                'name': 'spring_mockmvc_perform',
+                'pattern': re.compile(r'\.perform\s*\((?:[a-zA-Z0-9_.]*\.)?((?:get|post|put|delete|patch|head|options)\s*\(.*?\))'),
+                'handler': lambda m: m.group(1)
+            }
+        ]
+
     def get_method_pattern(self) -> str:
         return r'''
             (?P<annotations>(?:\s*@\w+(?:\(.*?\))?\s*)*)\s*  # Annotazioni opzionali
@@ -74,7 +86,6 @@ class JavaParser(LanguageParser):
         return [
             '.mock(',
             '@Mock',
-            '.when(',
             'verify(',
             'doReturn(',
             '.thenReturn(',
@@ -96,8 +107,13 @@ class JavaParser(LanguageParser):
 
     def line_contains_mock(self, line: str) -> bool:
         """Controlla se la riga matcha uno qualsiasi dei filtri di mocking."""
-        return None
+        return any(p.search(line) for p in self._filters)
 
     def extract_mock_subject(self, line: str) -> Optional[str]:
-        """Estrae il soggetto del mock usando il pattern specifico per Python."""
+        """Estrae il soggetto del mock usando il pattern specifico per Java."""
+        stripped_line = line.strip()
+        for strategy in self._extraction_strategies:
+            match = strategy['pattern'].search(stripped_line)
+            if match:
+                return strategy['handler'](match)
         return None

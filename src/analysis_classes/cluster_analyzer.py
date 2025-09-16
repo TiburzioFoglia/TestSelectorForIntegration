@@ -10,6 +10,8 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import pdist
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, manhattan_distances
 from sklearn.metrics import silhouette_score
+from kneed import KneeLocator
+from sklearn.preprocessing import StandardScaler
 
 
 class CodeClusterAnalyzer:
@@ -32,6 +34,9 @@ class CodeClusterAnalyzer:
 
         results = {}
 
+        scaler = StandardScaler()
+        scaled_embeddings = scaler.fit_transform(embeddings)
+
         for algorithm in algorithms:
             results[algorithm] = {}
 
@@ -40,14 +45,14 @@ class CodeClusterAnalyzer:
 
                 try:
                     if algorithm == 'dbscan':
-                        labels = self._dbscan_clustering(embeddings, metric)
+                        labels = self._dbscan_clustering(scaled_embeddings, metric)
                     elif algorithm == 'kmeans':
-                        labels = self._kmeans_clustering(embeddings, metric)
+                        labels = self._kmeans_clustering(scaled_embeddings, metric)
                     elif algorithm == 'hierarchical':
-                        labels = self._hierarchical_clustering(embeddings, metric)
+                        labels = self._hierarchical_clustering(scaled_embeddings, metric)
 
                     # Valuta la qualità del clustering
-                    quality_score = self._evaluate_clustering_quality(embeddings, labels, metric)
+                    quality_score = self._evaluate_clustering_quality(scaled_embeddings, labels, metric)
 
                     results[algorithm][metric] = {
                         'labels': labels,
@@ -137,45 +142,46 @@ class CodeClusterAnalyzer:
         return clustering.fit_predict(embeddings)
 
     def _calculate_optimal_eps(self, embeddings: np.ndarray, metric: str, k: int = None) -> float:
-        """Calcola eps ottimale per DBSCAN usando k-distance plot"""
         n_samples = len(embeddings)
 
         if k is None:
             k = max(2, min(4, n_samples // 20))
+        if k >= n_samples:
+            k = n_samples - 1
+        if k <= 0:
+            k = 1
 
-        # Calcola le distanze k-nearest neighbor
+        # Calcola le distanze dei k vicini più prossimi per ogni punto
+        nearest_neighbors = NearestNeighbors(n_neighbors=k, metric=metric)
+        neighbors_fit = nearest_neighbors.fit(embeddings)
+        distances, _ = neighbors_fit.kneighbors(embeddings)
+
+        # Estrae le distanze del k-esimo vicino (l'ultima colonna del risultato) e le ordina in modo crescente.
+        k_distances = np.sort(distances[:, -1])
+        #print(f"  - Range delle distanze dal k-esimo vicino: [min: {k_distances[0]:.4f}, max: {k_distances[-1]:.4f}, media: {np.mean(k_distances):.4f}]")
+
+        # Trova il punto di "gomito" nel grafico delle distanze, che rappresenta l'epsilon ottimale.
+        x = range(1, len(k_distances) + 1)
         try:
-            nbrs = NearestNeighbors(n_neighbors=k, metric=metric).fit(embeddings)
-            distances, indices = nbrs.kneighbors(embeddings)
+            knee = KneeLocator(x, k_distances, curve='convex', direction='increasing', S=1.5)
+            optimal_eps = knee.knee_y
 
-            # Prendi la distanza al k-esimo vicino (ignora il punto stesso)
-            k_distances = np.sort(distances, axis=0)
-            k_distances = k_distances[:, k-1]
+            if optimal_eps is None:
+                print(
+                    "Attenzione: impossibile trovare un punto di gomito. Si usa un valore di fallback (90° percentile).")
+                optimal_eps = np.percentile(k_distances, 90)
 
-            # Trova il punto di gomito
-            optimal_eps = self._find_elbow_point(k_distances)
+        except Exception:
+            print(
+                "Attenzione: si è verificato un errore nel calcolo del gomito. Si usa un valore di fallback (90° percentile).")
+            optimal_eps = np.percentile(k_distances, 90)
 
-            # Aggiusta eps basandosi sulla metrica
-            if metric == 'cosine':
-                optimal_eps = min(optimal_eps, 0.01)  # Cosine è in [0,1]
-            elif metric == 'euclidean':
-                optimal_eps = min(optimal_eps, 1.0)
-            elif metric == 'manhattan':
-                optimal_eps = min(optimal_eps * 1.5, 5.0)  # Manhattan tende ad avere distanze maggiori
+        if optimal_eps == 0:
+            print(
+                "Attenzione: Epsilon calcolato è 0. Potrebbero esserci punti duplicati. Si usa un percentile come fallback.")
+            optimal_eps = np.percentile(k_distances, 95)
 
-            # Fallback se l'eps calcolato è troppo estremo
-            median_dist = np.median(k_distances)
-            if optimal_eps > median_dist * 3 or optimal_eps < median_dist * 0.1 :
-                print(f"Eps calcolato ({optimal_eps:.4f}) sembra estremo, uso mediana: {median_dist:.4f}")
-                optimal_eps = median_dist
-
-            return optimal_eps
-
-        except Exception as e:
-            print(f"Errore nel calcolo eps per {metric}: {e}")
-            # Fallback values basati sulla metrica
-            fallback_values = {'cosine': 0.1, 'euclidean': 1.0, 'manhattan': 2.0}
-            return fallback_values.get(metric, 1.0)
+        return optimal_eps
 
     def _determine_optimal_k(self, embeddings: np.ndarray, metric: str) -> int:
         """Determina numero ottimale di cluster usando elbow method"""
@@ -208,45 +214,6 @@ class CodeClusterAnalyzer:
             optimal_k = 3
 
         return optimal_k
-
-    def _find_elbow_point(self, distances: np.ndarray) -> int:
-        """Trova l'indice del punto di gomito in una curva di distanze"""
-        n_points = len(distances)
-        if n_points < 10:
-            return min(n_points - 1, max(0, int(n_points * 0.75)))
-
-        # Usa il metodo della linea retta per trovare il gomito
-        # Traccia una linea dal primo all'ultimo punto
-        x_coords = np.arange(n_points)
-        y_coords = distances
-
-        # Calcola la distanza di ogni punto dalla linea retta
-        # Linea dal primo all'ultimo punto: y = mx + c
-        x1, y1 = 0, y_coords[0]
-        x2, y2 = n_points - 1, y_coords[-1]
-
-        # Calcola la distanza perpendicolare di ogni punto dalla linea
-        distances_from_line = []
-        for i in range(n_points):
-            x0, y0 = i, y_coords[i]
-            # Distanza punto-linea: |ax + by + c| / sqrt(a² + b²)
-            # Dove la linea è: (y2-y1)x - (x2-x1)y + (x2-x1)y1 - (y2-y1)x1 = 0
-            a = y2 - y1
-            b = -(x2 - x1)
-            c = (x2 - x1) * y1 - (y2 - y1) * x1
-
-            distance = abs(a * x0 + b * y0 + c) / np.sqrt(a ** 2 + b ** 2)
-            distances_from_line.append(distance)
-
-        # Il punto di gomito è quello con la massima distanza dalla linea
-        # Ma considera solo la parte iniziale-media della curva
-        search_end = min(n_points, int(n_points * 0.8))
-        elbow_idx = np.argmax(distances_from_line[:search_end])
-
-        # Assicura che non sia troppo all'inizio
-        elbow_idx = max(elbow_idx, n_points // 20)
-
-        return elbow_idx
 
     def _evaluate_clustering_quality(self, embeddings: np.ndarray, labels: np.ndarray, metric: str) -> float:
         """Valuta la qualità del clustering usando silhouette score"""
