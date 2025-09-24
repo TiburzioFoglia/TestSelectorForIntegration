@@ -41,9 +41,9 @@ def main():
         help=f"Choose a code analyzer (default: codeBert, options: {', '.join(ANALYZERS)})"
     )
     parser.add_argument(
-        "--mocks-only",
+        "--full-tests",
         action="store_true",
-        help="Run tests selection taking into consideration mocks only"
+        help="Run tests selection taking into consideration the full tests"
     )
 
     args = parser.parse_args()
@@ -51,13 +51,13 @@ def main():
     file_name = args.file_name
     num_elements = args.n_test
     analyzer = args.code_analyzer
-    mocks_only = args.mocks_only
+    full_tests = args.full_tests
 
     print("=" * 50)
     print("File:", file_name)
     print("N Tests:", num_elements)
     print(f"Analyzer: {analyzer}")
-    print("Mocks only:", mocks_only)
+    print("Mocks only:", not full_tests)
 
     language = get_language(args.file_name)
 
@@ -79,7 +79,7 @@ def main():
 
     print("=" * 50)
 
-    methods_info = process_file(file_name, language, folder_path, mocks_only)
+    methods_info = process_file(file_name, language, folder_path, full_tests)
     if methods_info is None:
         print("Something went wrong")
         sys.exit(1)
@@ -87,7 +87,7 @@ def main():
 
 
     print("Inizio analisi metodi ...")
-    if mocks_only:
+    if not full_tests:
         cluster_analysis(os.path.join(folder_path, 'extracted_methods.json'), folder_path, analyzer,
                          os.path.join(folder_path, 'complete_extracted_methods.json'))
     else:
@@ -104,13 +104,14 @@ def main():
     create_commented_copy(file_name, comprehensive_analysis_path, selected_methods_path, language)
     print("=" * 50)
 
-    selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
-    extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
+    if not full_tests:
+        selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
+        extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
 
-    cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
+        cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
 
-    print(f"Risultato della Coverage of Integration Points (CPI): {cpi_result:.2f}%")
-    print("=" * 50)
+        print(f"Risultato della Coverage of Integration Points (CPI): {cpi_result:.2f}%")
+        print("=" * 50)
 
 
 def get_language(file_name):
@@ -123,7 +124,7 @@ def get_language(file_name):
     return lang
 
 
-def process_file(file_path: str,language: Language, output_dir: str = "analysis_output", mocks_only: bool = False):
+def process_file(file_path: str,language: Language, output_dir: str = "analysis_output", full_tests: bool = False):
     print(f"Processando file: {file_path}")
 
     if not os.path.exists(file_path):
@@ -160,7 +161,7 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
 
     print("Eliminando dai metodi elementi non mock...")
 
-    if mocks_only:
+    if not full_tests:
         filtered_test_methods = extractor_instance.strip_methods_to_mock_lines(test_methods_with_mocks)
     else:
         filtered_test_methods = test_methods_with_mocks
@@ -177,7 +178,7 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
     methods_info = create_extracted_methods_file(filtered_test_methods, clean_methods,
                                                  output_dir, "extracted_methods.json")
 
-    if mocks_only:
+    if not full_tests:
         complete_clean_methods = extractor_instance.methods_to_codebert_format(test_methods_with_mocks)
         create_extracted_methods_file(filtered_test_methods, complete_clean_methods,
                                       output_dir, "complete_extracted_methods.json")
@@ -344,7 +345,7 @@ if __name__ == "__main__":
     main()
     # folder_path = 'analysis_output'
     # selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
-    # extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
+    # extracted_methods_file = 'extracted_methods_owner.json'
     #
     # cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
     #
