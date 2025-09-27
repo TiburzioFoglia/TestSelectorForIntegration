@@ -2,8 +2,9 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
-class PolyCoderEmbedder:
+class PolyCoderEmbedder(Embedder):
     """Classe per estrarre embeddings con PolyCoder"""
 
     def __init__(self, model_name="NinedayWang/PolyCoder-2.7B"):

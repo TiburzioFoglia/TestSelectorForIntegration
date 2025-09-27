@@ -2,9 +2,10 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
 
-class CodeT5Embedder:
+class CodeT5Embedder(Embedder):
     """Classe per estrarre embeddings con CodeT5."""
 
     def __init__(self, model_name="Salesforce/codet5p-110m-embedding"):

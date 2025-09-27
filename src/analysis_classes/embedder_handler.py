@@ -4,11 +4,13 @@ from .embedders.polyCoder_embedder import PolyCoderEmbedder
 from .embedders.sentenceTransformer_embedder import SentenceTransformerEmbedder
 from .embedders.unixCoder_embedder import UnixCoderEmbedder
 from .embedders.starCoder2_embedder import StarCoder2Embedder
+from .embedder_interface import Embedder
 
-def get_embedder(embedder_name: str):
+
+def get_embedder(embedder_name: str) -> Embedder:
     if embedder_name == "codeBert":
         return CodeBERTEmbedder("microsoft/codebert-base")
-    if embedder_name == "graphCodeBert":
+    elif embedder_name == "graphCodeBert":
         return CodeBERTEmbedder("microsoft/graphcodebert-base")
     elif embedder_name == "codeT5":
         return CodeT5Embedder()
@@ -22,4 +24,5 @@ def get_embedder(embedder_name: str):
         return StarCoder2Embedder()
     else:
         raise ValueError(f"Embedder '{embedder_name}' non supportato.")
+
 

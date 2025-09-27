@@ -2,8 +2,10 @@ import torch
 from transformers import RobertaTokenizer, RobertaModel
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
-class CodeBERTEmbedder:
+
+class CodeBERTEmbedder(Embedder):
     """Classe per estrarre embeddings con CodeBERT"""
 
     def __init__(self, model_name="microsoft/codebert-base"):

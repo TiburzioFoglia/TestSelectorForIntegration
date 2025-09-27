@@ -2,8 +2,9 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
-class StarCoder2Embedder:
+class StarCoder2Embedder(Embedder):
     """Classe per estrarre embeddings di codice utilizzando il modello StarCoder2"""
 
     def __init__(self, model_name="bigcode/starcoder2-3b"):

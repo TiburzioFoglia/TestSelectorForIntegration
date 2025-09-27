@@ -1,8 +1,9 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
-class SentenceTransformerEmbedder:
+class SentenceTransformerEmbedder(Embedder):
     """Classe per estrarre embeddings con Sentence-Transformers generico"""
 
     def __init__(self, model_name='all-MiniLM-L6-v2'):

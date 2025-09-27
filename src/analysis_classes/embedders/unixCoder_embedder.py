@@ -1,8 +1,9 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from typing import List
+from src.analysis_classes.embedder_interface import Embedder
 
-class UnixCoderEmbedder:
+class UnixCoderEmbedder(Embedder):
     """Classe per estrarre embeddings con Sentence-Transformers specifico per il codice"""
 
     def __init__(self, model_name='microsoft/unixcoder-base'):

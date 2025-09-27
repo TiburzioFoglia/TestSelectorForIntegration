@@ -173,7 +173,7 @@ def process_file(file_path: str,language: Language, output_dir: str = "analysis_
         print(f"Ottenuti {len(filtered_test_methods)} metodi di test con solo mock")
 
 
-    print("Preparazione per CodeBERT...")
+    print("Preparazione per l'embedder...")
     clean_methods = extractor_instance.methods_to_codebert_format(filtered_test_methods)
     methods_info = create_extracted_methods_file(filtered_test_methods, clean_methods,
                                                  output_dir, "extracted_methods.json")
@@ -198,7 +198,7 @@ def create_extracted_methods_file(filtered_test_methods: list, clean_methods: li
     with open(methods_file, 'w', encoding='utf-8') as f:
         json.dump(methods_info, f, indent=2, ensure_ascii=False)
 
-    print(f"Salvati metodi per CodeBERT come {file_name}")
+    print(f"Salvati metodi per l'embedder come {file_name}")
     return methods_info
 
 def cluster_analysis(input_file: str, output_dir: str, analyzer: str, complete_methods_file: str = None):
