@@ -108,9 +108,9 @@ def main():
         selected_methods_file = os.path.join(folder_path, 'selected_methods.json')
         extracted_methods_file = os.path.join(folder_path, 'extracted_methods.json')
 
-        cpi_result = calculate_cpi(selected_methods_file, extracted_methods_file)
+        cip_result = calculate_cip(selected_methods_file, extracted_methods_file)
 
-        print(f"Risultato della Coverage of Integration Points (CPI): {cpi_result:.2f}%")
+        print(f"Risultato della Coverage of Integration Points (CIP): {cip_result:.2f}%")
         print("=" * 50)
 
 
@@ -295,7 +295,7 @@ def create_commented_copy(source_file_path: str, analysis_results_path: str, sel
         return None
 
 
-def calculate_cpi(selected_methods_path: str, extracted_methods_path: str) -> float:
+def calculate_cip(selected_methods_path: str, extracted_methods_path: str) -> float:
 
     with open(selected_methods_path, 'r') as f:
         selected_methods_data = json.load(f)
@@ -324,7 +324,7 @@ def calculate_cpi(selected_methods_path: str, extracted_methods_path: str) -> fl
             interactions = method_code.strip().split('\n')
             selected_interactions.update(interaction for interaction in interactions if interaction)
 
-    # Calcola il CPI usando la formula
+    # Calcola la CIP usando la formula
     num_total_interactions = len(total_interactions)
     num_selected_interactions = len(selected_interactions)
 
@@ -336,9 +336,9 @@ def calculate_cpi(selected_methods_path: str, extracted_methods_path: str) -> fl
     if num_total_interactions == 0:
         return 0.0
 
-    cpi = (num_selected_interactions / num_total_interactions) * 100
+    cip = (num_selected_interactions / num_total_interactions) * 100
 
-    return cpi
+    return cip
 
 
 if __name__ == "__main__":
